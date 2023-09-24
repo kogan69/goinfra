@@ -80,12 +80,6 @@ type PgLogger struct {
 	level  slog.Level
 }
 
-func typeRegister(_ context.Context, conn *pgx.Conn) (err error) {
-	pgxuuid.Register(conn.TypeMap())
-	pgxdecimal.Register(conn.TypeMap())
-	return
-}
-
 func (p PgLogger) Log(ctx context.Context, level tracelog.LogLevel, msg string, data map[string]any) {
 	if level == tracelog.LogLevelNone {
 		return
@@ -103,4 +97,10 @@ func (p *PgDb) Query(ctx context.Context, sql string, params ...any) (pgx.Rows, 
 
 func (p *PgDb) Exec(ctx context.Context, sql string, args ...interface{}) (pgconn.CommandTag, error) {
 	return p.pool.Exec(ctx, sql, args...)
+}
+
+func typeRegister(_ context.Context, conn *pgx.Conn) (err error) {
+	pgxuuid.Register(conn.TypeMap())
+	pgxdecimal.Register(conn.TypeMap())
+	return
 }
