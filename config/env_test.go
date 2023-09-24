@@ -8,11 +8,11 @@ import (
 )
 
 func Test_Configure(t *testing.T) {
-	assert.Equal(t, "", config.GetEnvValue("DEBUG_LEVEL", ""))
+	assert.Equal(t, "", config.GetEnvValue("LOG_LEVEL", ""))
 	err := config.InitEnvFromFile(".env.test")
 
 	assert.NoError(t, err)
-	assert.Equal(t, "info", config.GetEnvValue("DEBUG_LEVEL", ""))
+	assert.Equal(t, "info", config.GetEnvValue("LOG_LEVEL", ""))
 }
 
 func Test_Bad_Config_File_Path(t *testing.T) {
