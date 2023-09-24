@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/georgysavva/scany/v2/pgxscan"
 	pgxuuid "github.com/jackc/pgx-gofrs-uuid"
 	pgxdecimal "github.com/jackc/pgx-shopspring-decimal"
 	"github.com/jackc/pgx/v5"
@@ -97,6 +98,10 @@ func (p *PgDb) Query(ctx context.Context, sql string, params ...any) (pgx.Rows, 
 
 func (p *PgDb) Exec(ctx context.Context, sql string, args ...interface{}) (pgconn.CommandTag, error) {
 	return p.pool.Exec(ctx, sql, args...)
+}
+
+func (p *PgDb) ScanRow(dest any, rows pgx.Rows) error {
+	return pgxscan.ScanRow(dest, rows)
 }
 
 func typeRegister(_ context.Context, conn *pgx.Conn) (err error) {

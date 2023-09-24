@@ -4,6 +4,7 @@ go 1.21.1
 
 require (
 	github.com/davecgh/go-spew v1.1.1
+	github.com/georgysavva/scany/v2 v2.0.0
 	github.com/getsentry/sentry-go v0.24.1
 	github.com/gofrs/uuid/v5 v5.0.0
 	github.com/jackc/pgtype v1.14.0
