@@ -26,3 +26,16 @@ func NewFromEnv(env string, name string) Reporter {
 	}
 	return New(env, name, sentryDsn)
 }
+
+type TestReporter struct {
+}
+
+func (tr *TestReporter) ReportException(error) {
+
+}
+func (tr *TestReporter) ReportFatal(error) {
+
+}
+func NewTestReporter() Reporter {
+	return &TestReporter{}
+}
