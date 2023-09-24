@@ -10,6 +10,7 @@ import (
 func Test_Configure(t *testing.T) {
 	assert.Equal(t, "", config.GetEnvValue("DEBUG_LEVEL", ""))
 	err := config.InitEnvFromFile(".env.test")
+
 	assert.NoError(t, err)
 	assert.Equal(t, "info", config.GetEnvValue("DEBUG_LEVEL", ""))
 }
