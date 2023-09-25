@@ -7,8 +7,6 @@ import (
 	"os"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
-	pgxuuid "github.com/jackc/pgx-gofrs-uuid"
-	pgxdecimal "github.com/jackc/pgx-shopspring-decimal"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -31,7 +29,7 @@ func NewPgDbWithLog(dbUrl, logLevel string) (*PgDb, error) {
 		LogLevel: 0,
 	}
 
-	config.AfterConnect = typeRegister
+	config.AfterConnect = TypeRegister
 
 	conn, err := pgxpool.NewWithConfig(context.Background(), config)
 	if err != nil {
@@ -103,9 +101,9 @@ func (p *PgDb) Exec(ctx context.Context, sql string, args ...interface{}) (pgcon
 func (p *PgDb) ScanRow(dest any, rows pgx.Rows) error {
 	return pgxscan.ScanRow(dest, rows)
 }
-
-func typeRegister(_ context.Context, conn *pgx.Conn) (err error) {
-	pgxuuid.Register(conn.TypeMap())
-	pgxdecimal.Register(conn.TypeMap())
-	return
+func (p *PgDb) ScanOne(dst interface{}, rows pgx.Rows) error {
+	return pgxscan.ScanOne(dst, rows)
+}
+func (p *PgDb) ScanAll(dst interface{}, rows pgx.Rows) error {
+	return pgxscan.ScanAll(dst, rows)
 }
