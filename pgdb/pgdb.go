@@ -108,5 +108,7 @@ func (p *PgDb) ScanAll(dst interface{}, rows pgx.Rows) error {
 	return pgxscan.ScanAll(dst, rows)
 }
 func (p *PgDb) CloseRows(rows pgx.Rows) {
-	rows.Close()
+	if rows != nil {
+		rows.Close()
+	}
 }
