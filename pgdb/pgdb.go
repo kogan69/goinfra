@@ -107,3 +107,6 @@ func (p *PgDb) ScanOne(dst interface{}, rows pgx.Rows) error {
 func (p *PgDb) ScanAll(dst interface{}, rows pgx.Rows) error {
 	return pgxscan.ScanAll(dst, rows)
 }
+func (p *PgDb) CloseRows(rows pgx.Rows) {
+	rows.Close()
+}
