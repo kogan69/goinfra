@@ -90,6 +90,10 @@ func (p PgLogger) Log(ctx context.Context, level tracelog.LogLevel, msg string, 
 	p.logger.LogAttrs(ctx, p.level, msg, attrs...)
 }
 
+func (p *PgDb) Begin(ctx context.Context) (pgx.Tx, error) {
+	return p.pool.Begin(ctx)
+}
+
 func (p *PgDb) Query(ctx context.Context, sql string, params ...any) (pgx.Rows, error) {
 	return p.pool.Query(ctx, sql, params...)
 }
