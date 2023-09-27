@@ -145,3 +145,7 @@ func (t *TxPg) Rollback() error {
 func (t *TxPg) Tx() pgx.Tx {
 	return t.tx
 }
+
+func ToTxPg(tx any) *TxPg {
+	return tx.(*TxPg)
+}
