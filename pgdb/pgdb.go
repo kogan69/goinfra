@@ -17,6 +17,11 @@ type PgDb struct {
 	pool *pgxpool.Pool
 }
 
+type TxPg struct {
+	pgx.Tx
+	context.Context
+}
+
 func NewPgDbWithLog(dbUrl, logLevel string) (*PgDb, error) {
 	config, err := pgxpool.ParseConfig(dbUrl)
 	if err != nil {
@@ -115,4 +120,36 @@ func (p *PgDb) CloseRows(rows pgx.Rows) {
 	if rows != nil {
 		rows.Close()
 	}
+}
+
+func (t *TxPg) Commit() error {
+	return t.Tx.Commit(t.Context)
+}
+
+func (t *TxPg) Rollback() {
+	panic("implement me")
+}
+
+func (t *TxPg) Exec(sql string, args ...interface{}) (any, error) {
+	panic("implement me")
+}
+
+func (t *TxPg) Query(sql string, args ...interface{}) (any, error) {
+	panic("implement me")
+}
+
+func (t *TxPg) QueryRow(sql string, args ...interface{}) any {
+	panic("implement me")
+}
+
+func (t *TxPg) ScanOne(dst interface{}, rows pgx.Rows) {
+	panic("implement me")
+}
+
+func (t *TxPg) ScanAll(dst interface{}, rows pgx.Rows) error {
+	panic("implement me")
+}
+
+func (t *TxPg) ScanRow(dst interface{}, rows pgx.Rows) {
+	panic("implement me")
 }
