@@ -11,6 +11,8 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/tracelog"
+	"github.com/kogan69/goinfra/utils"
+	"github.com/pkg/errors"
 )
 
 type PgDb struct {
@@ -95,8 +97,18 @@ func (p PgLogger) Log(ctx context.Context, level tracelog.LogLevel, msg string, 
 	p.logger.LogAttrs(ctx, p.level, msg, attrs...)
 }
 
-func (p *PgDb) Begin(ctx context.Context) (pgx.Tx, error) {
-	return p.pool.Begin(ctx)
+func (p *PgDb) Begin(ctx context.Context) (*TxPg, error) {
+
+	tx, err := p.pool.Begin(ctx)
+	if err != nil {
+		err = errors.Wrap(err, utils.FunctionName())
+		return nil, err
+	}
+	txPg := &TxPg{
+		tx:      tx,
+		Context: ctx,
+	}
+	return txPg, err
 }
 
 func (p *PgDb) Query(ctx context.Context, sql string, params ...any) (pgx.Rows, error) {
