@@ -18,7 +18,7 @@ type PgDb struct {
 }
 
 type TxPg struct {
-	pgx.Tx
+	tx pgx.Tx
 	context.Context
 }
 
@@ -123,33 +123,13 @@ func (p *PgDb) CloseRows(rows pgx.Rows) {
 }
 
 func (t *TxPg) Commit() error {
-	return t.Tx.Commit(t.Context)
+	return t.tx.Commit(t.Context)
 }
 
-func (t *TxPg) Rollback() {
-	panic("implement me")
+func (t *TxPg) Rollback() error {
+	return t.tx.Commit(t.Context)
 }
 
-func (t *TxPg) Exec(sql string, args ...interface{}) (any, error) {
-	panic("implement me")
-}
-
-func (t *TxPg) Query(sql string, args ...interface{}) (any, error) {
-	panic("implement me")
-}
-
-func (t *TxPg) QueryRow(sql string, args ...interface{}) any {
-	panic("implement me")
-}
-
-func (t *TxPg) ScanOne(dst interface{}, rows pgx.Rows) {
-	panic("implement me")
-}
-
-func (t *TxPg) ScanAll(dst interface{}, rows pgx.Rows) error {
-	panic("implement me")
-}
-
-func (t *TxPg) ScanRow(dst interface{}, rows pgx.Rows) {
-	panic("implement me")
+func (t *TxPg) Tx() pgx.Tx {
+	return t.tx
 }
