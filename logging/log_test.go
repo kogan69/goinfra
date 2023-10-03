@@ -8,7 +8,7 @@ import (
 )
 
 func Test_Log_Config(t *testing.T) {
-	logging.Configure("app1", "1.2.3", "dev", "debug", nil)
+	logging.Init("app1", "1.2.3", "dev", "debug", nil)
 	logging.Debug("debug message")
 	logging.Info("info message")
 	logging.Warn("warning message")

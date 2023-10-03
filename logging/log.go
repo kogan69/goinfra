@@ -4,18 +4,28 @@ import (
 	"log/slog"
 	"os"
 	"sync"
+
+	"github.com/kogan69/goinfra/config"
 )
 
 var loggerOnce sync.Once
 var errorReporter Reporter
 var logger *slog.Logger
 
-func Configure(name, version, environment, logLevel string, reporter Reporter) {
+func Init(name, version, environment, logLevel string, reporter Reporter) {
 	loggerOnce.Do(func() {
 		initLogger(name, version, environment, logLevel, reporter)
 	})
 }
 
+func InitFromEnv() {
+	name := config.GetEnvValue("APP_NAME", "unknown")
+	version := config.GetEnvValue("APP_VERSION", "unknown")
+	env := config.GetEnvValue("ENV", "development")
+	logLevel := config.GetEnvValue("LOG_LEVEL", "info")
+	reporter := NewFromEnv(env, name)
+	Init(name, version, env, logLevel, reporter)
+}
 func initLogger(
 	name string,
 	version string,
