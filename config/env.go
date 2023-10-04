@@ -6,16 +6,63 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/joho/godotenv"
+	"github.com/pkg/errors"
 )
 
-func InitEnvFromFile(envFilePath string) (err error) {
-	err = godotenv.Overload(envFilePath)
-	if err != nil {
+type EnvType string
+
+const (
+	Dev        EnvType = `development`
+	Test               = `test`
+	Production         = `production`
+)
+
+type EnvConfig struct {
+	Type EnvType
+}
+
+var envOnce sync.Once
+var envConfig EnvConfig
+
+func envInstance() EnvConfig {
+	envOnce.Do(func() {
+		_ = godotenv.Overload(`.env`)
+		envName, exists := os.LookupEnv("ENV")
+		if !exists {
+			panic("ENV variable is not set. possible values are: development, test, production")
+		}
+		et, err := parseEnvName(envName)
+		envConfig = EnvConfig{Type: et}
+		if err != nil {
+			panic(err)
+		}
 		return
+	})
+	return envConfig
+}
+
+func (ec EnvConfig) getEnvValue(key string, defValue string) string {
+	envValue, exists := os.LookupEnv(key)
+	if !exists {
+		return defValue
 	}
-	return err
+	return envValue
+}
+func parseEnvName(envName string) (EnvType, error) {
+	switch EnvType(strings.ToLower(envName)) {
+	case Dev:
+		return Dev, nil
+	case Test:
+		return Test, nil
+	case Production:
+		return Production, nil
+	default:
+		return "", errors.New(fmt.Sprintf("invalid env name:%s. possible values are: development, test, production",
+			envName))
+	}
 }
 
 func GetEnvValueOrPanic(key string) string {
@@ -25,20 +72,16 @@ func GetEnvValueOrPanic(key string) string {
 	}
 	return value
 }
+
 func GetEnvValue(key, defValue string) string {
-	envValue, exists := os.LookupEnv(key)
-	if !exists {
-		return defValue
-	}
-	return envValue
+	return envInstance().getEnvValue(key, defValue)
 }
 
 func GetEnvValueBool(key string, defValue bool) bool {
-	val, exists := os.LookupEnv(key)
-	if !exists {
+	val := GetEnvValue(key, "")
+	if val == "" {
 		return defValue
-	}
-	if strings.ToLower(strings.Trim(val, " ")) == "true" {
+	} else if strings.ToLower(strings.Trim(val, " ")) == "true" {
 		return true
 	} else {
 		return false
@@ -57,7 +100,6 @@ func GetEnvValueInt(key string, defValue int) int {
 			return v
 		}
 	}
-
 }
 
 func GetEnvValueFloat64(key string, defValue float64) float64 {
@@ -72,17 +114,16 @@ func GetEnvValueFloat64(key string, defValue float64) float64 {
 			return v
 		}
 	}
-
 }
 
 func IsProduction() bool {
-	return GetEnvValue("ENV", "development") == "production"
+	return envInstance().Type == Production
 }
 
 func IsDevelopment() bool {
-	return GetEnvValue("ENV", "development") == "development"
+	return envInstance().Type == Dev
 }
 
 func IsTesting() bool {
-	return GetEnvValue("ENV", "development") == "test"
+	return envInstance().Type == Test
 }
