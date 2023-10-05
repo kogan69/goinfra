@@ -51,3 +51,10 @@ func ToJsonAsByteArray[T any](obj T) (data []byte, err error) {
 	data = bb.Bytes()
 	return
 }
+
+func ToJsonAsByteBuffer[T any](obj T) (bb *bytes.Buffer, err error) {
+	bb = new(bytes.Buffer)
+	enc := json.NewEncoder(bb)
+	err = enc.Encode(obj)
+	return
+}
