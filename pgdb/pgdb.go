@@ -2,10 +2,12 @@ package pgdb
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log/slog"
 	"os"
 
+	"github.com/georgysavva/scany/v2/dbscan"
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -16,7 +18,8 @@ import (
 )
 
 type PgDb struct {
-	pool *pgxpool.Pool
+	pool    *pgxpool.Pool
+	scanApi *dbscan.API
 }
 
 type TxPg struct {
@@ -39,11 +42,16 @@ func NewPgDbWithLog(dbUrl, logLevel string) (*PgDb, error) {
 	config.AfterConnect = TypeRegister
 
 	conn, err := pgxpool.NewWithConfig(context.Background(), config)
+
+	scanApi, err := dbscan.NewAPI()
+	if err != nil {
+		return nil, err
+	}
 	if err != nil {
 		return nil, err
 	}
 
-	return &PgDb{pool: conn}, nil
+	return &PgDb{pool: conn, scanApi: scanApi}, nil
 }
 
 func NewPgLogger(logLevel string) *PgLogger {
@@ -119,15 +127,34 @@ func (p *PgDb) Exec(ctx context.Context, sql string, args ...interface{}) (pgcon
 	return p.pool.Exec(ctx, sql, args...)
 }
 
+func ScanErrorWrap(err error) error {
+	if err == nil {
+		return nil
+	}
+	switch {
+	case
+		errors.Is(err, pgx.ErrNoRows),
+		errors.Is(err, dbscan.ErrNotFound):
+		return sql.ErrNoRows
+	default:
+		return err
+	}
+}
 func (p *PgDb) ScanRow(dest any, rows pgx.Rows) error {
-	return pgxscan.ScanRow(dest, rows)
+	err := p.scanApi.ScanRow(dest, pgxscan.NewRowsAdapter(rows))
+	return ScanErrorWrap(err)
 }
+
 func (p *PgDb) ScanOne(dst interface{}, rows pgx.Rows) error {
-	return pgxscan.ScanOne(dst, rows)
+	err := p.scanApi.ScanOne(dst, pgxscan.NewRowsAdapter(rows))
+	return ScanErrorWrap(err)
 }
+
 func (p *PgDb) ScanAll(dst interface{}, rows pgx.Rows) error {
-	return pgxscan.ScanAll(dst, rows)
+	err := p.scanApi.ScanAll(dst, pgxscan.NewRowsAdapter(rows))
+	return ScanErrorWrap(err)
 }
+
 func (p *PgDb) CloseRows(rows pgx.Rows) {
 	if rows != nil {
 		rows.Close()
