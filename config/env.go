@@ -76,6 +76,13 @@ func GetEnvValueOrPanic(key string) string {
 func GetEnvValue(key, defValue string) string {
 	return envInstance().getEnvValue(key, defValue)
 }
+func GetEnvValueNoDefault(key string) (string, error) {
+	v := envInstance().getEnvValue(key, "")
+	if v == "" {
+		return v, fmt.Errorf("env variable %s is not set", key)
+	}
+	return v, nil
+}
 
 func GetEnvValueBool(key string, defValue bool) bool {
 	val := GetEnvValue(key, "")
